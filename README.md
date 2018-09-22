@@ -1,6 +1,6 @@
 # docs-linux-generic
 
-1. This repository is meant to manage my own personal documentation about generic things related to Linux that are not related to any particular Linux distribution.
+1. This repository is created to manage my own personal documentation about generic things related to Linux that are not related to any particular Linux distribution.
 
 2. All the contents of this repository will be regularly updated with important information about related topics.
 
