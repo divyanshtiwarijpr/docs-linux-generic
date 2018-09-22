@@ -1,3 +1,8 @@
+## LINUX BASIC FILE PERMISSIONS
+
+<br>
+<br>
+
 | BASIC PERMISSION     	| EFFECT ON FILES                          	    | EFFECT ON DIRECTORIES                                                                                         	| PRACTICAL EFFECT ON DIRECTORIES                                                                                                                                                                                                                                                                              	|
 |----------------------	|------------------------------------------	    |---------------------------------------------------------------------------------------------------------------	|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | r (read) mode = 4    	| 1. Contents of the files can be read.    	    | 1. Contents of the directory (only filenames not the file contents and not any other details) can be listed. 	| 1. Only filenames can be listed without any other details like permissions and timestamps. <br><br>  2. Files cannot be accessed. <br><br>  3. It is the permission to list directory contents.                                                                                                                                	|
