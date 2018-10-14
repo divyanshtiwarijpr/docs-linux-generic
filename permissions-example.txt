@@ -1,0 +1,232 @@
+﻿========================================================
+EXAMPLES OF LINUX BASIC FILE AND DIRECTORY PERMISSIONS
+========================================================
+
+GENERIC PREPARATION FOR ALL EXAMPLES:
+
+1. Create a directory that is accessible by everybody so the permissions of this directory does not matter and a contained environment is maintained. Create temporary users so that you can test the file and directory permissions.
+
+# mkdir /test 
+
+# chmod -v 777 /test 
+
+# useradd alice
+# useradd bob
+# useradd john
+# useradd test
+
+# usermod -a -G test alice
+# usermod -a -G test john
+
+
+2. As root create a set of test directories and test files.
+
+# cd /test
+
+# mkdir dirroot
+# mkdir diralice
+# mkdir dirbob
+# mkdir dirtest
+# mkdir dirroot
+
+
+3. Change the owner and group to match the usernames.
+
+# chown alice:alice diralice
+# chown bob:bob dirbob
+# chown john:john dirjohn
+# chown bob:test dirtest
+
+# touch fileroot
+(alice)$ touch filealice
+(bob)$ touch filebob
+(john)$ touch filejohn
+
+# ls -l /test
+
+
+5. Open multiple terminal tabs and switch to corresponding users having the first tab for root user.
+
+# su - root
+# su - USERNAME
+
+
+
+
+EXAMPLES AND REASONS:
+
+
+1.The permissions of parent directory block access to files andsubdirectories within it. If the user doesn’t have any permission on parent directory then the user cannot list and access any file in that directory even if the user owns some files inside the parent directory. 
+
+# chmod -v 000 /test
+# ls -ld /test
+(alice)$ ls -ld /test
+(alice)$ ls -l /test/diralice
+
+>> Now we don’t have permission to access our own directories as the parent directory denies the access.
+
+>> Tab completion will not work as the user has no read permission over the directory.
+
+>> When we try to access a non existent file by providing wrong filename then too we will get a permission denied error so when read permission is not granted no one can guess filenames as the directory will not even be checked for the provided filename. 
+
+>> In short we have no access at all. 
+
+# cd /test
+# chmod -v 777 /test
+
+(alice)$ cd /test 
+(alice)$ mkdir diralice/alicefirst
+(alice)$ mkdir diralice/alicesec
+
+(bob)$ cd /test
+(bob)$ mkdir dirbob/bobfirst
+(bob)$ mkdir dirbob/bobsec
+
+
+
+
+2. The user can delete any file or directory even the files and directories owned by root user if the user has write permission on parent directory as write permission on a directory is the permission to modify directory contents that are filenames in case of a directory. 
+
+(alice)$ rm -r dirroot
+
+>> The user alice was able to delete the directory that is owned by root as everybody had all the permissions on the parent directory.
+
+# mkdir dirroot
+# chmod -v 755 /test
+(alice)$ rm -r dirroot
+
+>> This time the user alice was not able to delete the directory as the parent directory denied the write permission required to modify directory contents.
+
+
+
+3. Only the owner has the right to change the modes of files or directories.
+
+# chmod -v 777 /test
+
+(alice)$ chmod -v 777 dirtest
+(alice)$ chmod -v 777 filebob
+
+>> The user alice will not be able to change permissions as user bob is the owner both the testdir directory and filebob not alice.
+
+(bob)$ chmod -v 755 dirbob
+(bob)$ chmod -v 664 filebob
+
+(bob)$ ls -l
+
+>> This time the permission will change as the user bob is the owner of both the things.
+
+>> Note the modes that we gave for directories and files as these are the default file and directory permissions in RHEL 6 and are set by using default masks for general users.
+
+>> As we can see the default file creation mask for root user is 0022 and for general users it is 0002. So the default mode for files created by root user is 644 and the default file permissions for general users is 775.
+
+>> The default mask for both the root user and general users is 0022 that defines that the default mode of directory creation for both root user and general users is 755 
+
+
+
+
+4. Only root user has the power to change the owner and group owner permissions of both files and directories.
+
+(bob)$ chown alice dirtest
+(bob)$ chgrp alice dirtest
+
+>> The permissions will not change as only root is allowed to change the owner and the group ownership permissions.
+
+
+ 
+
+5. The default mode of filesystem root (/) is 555 so no user except root can create any files or directories in the filesystem root (/)directory.
+
+(alice)$ mkdir /alicedir
+(alice)$ touch /alicefilr
+
+(alice)$ ls -ld /
+
+>> The command will fail as only root can create files and directories in the filesystem root (/) directory.
+
+
+
+6. The default mode of the home directory of root user (/root) is 550 so only root user can create any files and directories there.
+
+(bob)$ mkdir /root/bobdir
+(bob)$ touch /root/bobfile 
+(bob)$ ls -ld /root 
+
+>> The command will fail as only root user not even the members of the root group can create any files or directories in root user's home directory (/root) by default.
+
+
+7. The default mode for user's home directory (/home/USERNAME) is 700 in RHEL 6 so users can only create and access files and directories in their own home directories by default.
+
+(alice)$ cd /home
+(alice)$ ls -l
+(alice)$ ls -ld
+
+(alice)$ mkdir bob/alicedir
+(alice)$ mkdir test/alicedir
+(alice)$ mkdir alice/alicedir
+
+>> The first two commands will fail as the user alice has no permissions over the home directories of test and bob. Even though user alice belongs to group test but when it comes to home directories security is most important.
+
+>> The second command succeeds as a user can create and access files and directories in his own home directory.
+
+
+
+
+8. When changing modes of directories recursively a user can only change modes of files and directories that he owns even if other users are having files and directories in that directory. This inplies that even in recursivw mode chmod can only change mode of files that a user owns.
+
+9. When creating files and directories in the folder in which mode was changed recursively the permissions of the parent directory are not inherited and and they are created using the mask of the creating user as usual. While the permissions of the parent directory are not inherited they can be used to block access to files and directories under it.
+
+10. The user ownership and group ownership are also not inherited when creating files or directories in a directory.
+
+(bob)$ chmod -v 775 dirtest
+
+>> It will succeed as the dirtest is owned by user bob and group test.
+
+(alice)$ touch dirtest/filetestalice
+(alice)$ mkdir dirtest/dirtestalice
+
+(john)$ touch dirtest/filetestjohn
+(john)$ mkdir dirtest/dirtestjohn
+
+>> These will also succeed as they get the write permissions as they are members of group test members of which have all permissions on this directory.
+
+(bob)$ chmod -v -R 777 dirtest
+
+>> It will not be successful as the above four items are not owned by user bob.
+
+(bob)$ chmod -v 777 dirtest 
+
+>> It will succeed as dirtest is owned by bob and it is not done recursively.
+
+(bob)$ mkdir dirtest/dirtestbob
+(bob)$ touch dirtest/filetestbob
+
+(bob)$ ls -l
+
+>> We can see that permissions and user and group ownership are not inherited as both the items has bob as both owner and group.
+
+(bob)$ chmod -v -R 777 /dirtest
+
+>> It will give errors for the above four items but will change the permission for files an directories owned by user bob. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
