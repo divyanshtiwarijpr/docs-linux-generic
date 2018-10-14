@@ -30,31 +30,39 @@
  
 - **Basic file permissions**:
 
-    1. `r` - read 
+    1. `r` - **read** 
 
         Numeric value: **4**
     
-        Effect on files: Contents of the files can be read.
+        **Effect on files**: Contents of the files can be read.
  
-        Effect on directories: Contents of the directory (filenames) can be listed. If only this permission is granted files cannot be accessed.
+        **Effect on directories**: Contents of the directory (filenames) can just be listed.
+
+        This permission enables the querying of just filenames without inode locations from filesystem metadata and thus if only this permission is granted files cannot be accessed as access requires the querying of inode locations from filesystem metadata allowed by granting execute permission.
 
 
-    2. `w` - write
+    2. `w` - **write**
 
         Numeric value: **2**
 
-        Effect on files: Contents of the files can be changed.
+        **Effect on files**: Contents of the files can be changed.
  
-        Effect on directories: Any file in the directory may be created or deleted.
+        **Effect on directories**: Files in the directory may be created or deleted.
+
+        If only this permission is granted without execute permission on directories then it is useless as for modification of directory contents access to inodes is necessary that is only available by granting execute permission.
 
 
-    3. `x` - execute
+    3. `x` - **execute**
 
         Numeric value: **1**
         
-        Effect on files: Files can be executed as commands.
+        **Effect on files**: Files can be executed as commands.
  
-        Effect on directories: Contents of the directory (filenames) can be accessed if the file permissions allow it. Other details like permissions, time stamps etc. can be queried. If only this permission is granted then the user cannot list the files contained in the directory but can access a file if the user knows the filename and also has permissions to read it.
+        **Effect on directories**: Contents of the directory (filenames) can be accessed if the file permissions allow it. Other details like permissions, time stamps etc. can be queried. 
+
+        If only this permission is granted then the user cannot list the files contained in the directory but can access a file if the user knows the filename and also has permissions to read it.
+
+        This permission enables the querying of inode locations from filesystem metadata and that is how it enables access.
 
     These permissions **affect files and directories differently** for which refer to the file `file-permissions-basic-table.docx` in this repository which covers the effect of these peermissions on files and directories in detail.
 
@@ -65,12 +73,14 @@
     
 - Format of defining and understanding permissions:
 
-    1. When **three** digits are used to get or set permissions they refer to the three types of permissions to three types of users geerally known as basic permissions.
+    1. When **three** digits are used to get or set permissions they refer to the three types of permissions to three types of users generally known as basic permissions.
 
     2. When **four** digits are provided to get or set file permissions, the **first** digit refers to **special permissions** and the remaining three digits refer to basic permissions as describes above. For more details on special permissions refer to file `file-permissions-special-table`in the same repository.
 
+    3. In most of the commands like `chmod`, `umask` et. if the four values are not defined in octal mode and only one or two or three digits are provided to the command then the missing values are **assumed to be preceding zeros**.
 
-- Rules that must be followed when calculating effective access in Linux.
+
+- Things that should be kept in mind when calculating effective access in Linux.
 
     1. Linux permissions apply only to file or directory that they are set on. Permissions on a directory are **not inherited automatically** by subdirectories and files within it. 
     
@@ -79,7 +89,18 @@
     2. The permissions on a directory can however block access to subdirectories and files within it so while calculating permissions for a file or directory first check that the user has **appropriate permissions on parent directory**. 
 
         
-    3. Only the **owner** has the right to **change the permissions** of files or directories.
+    3. Only the **root** user or **owner** has the right to change the **permissions** of files or directories.
     
-    4. Only **root** user has the power to change the **owner and group** owner permissions of both files and directories.
+    4. Only **root** user has the power to change the **owner and group** permissions of both files and directories.
+    
+    5. Start by calculating access on the uppermost directory and follow the whole path to the target file covering every subdirectory checking that the file or subdirectory permissions must also be correct for proper access.
 
+    6. Remember that permissions set on directories behave differently that permissions set on files.
+
+    7. Always keep in mind that the files themselves are actually the content of the directories and the data present in files forms content of those particular files.
+
+    8. Always remember as the parent directory permissions are not automatically inherited by subdirectories, to modify a directory recursively a user must have write permission on all the subdirectories in the parent directory. 
+        
+        In this situation any modification of files such as deletion or bulk renaming is not effecive over files conatined in subdirectories without write permission allowing the user that wants to operate in such a way and such an operation will result in partial completion due to wrong permissions on subdirectories. 
+
+        It must be kept in mind that this error is due to wrong permissions on subdirectories not files as files only control their data not modification of the files themselves which is controlled by write and execute permissions on parent directory.
