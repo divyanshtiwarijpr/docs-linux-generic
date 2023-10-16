@@ -19,11 +19,11 @@
 
 - **Categories of users** or **types of ownership** to which file permissions apply:
    
-    1. Owner - Generally the user who created the file. This can be changed later.
+    1. **Owner** - Generally the user who created the file. This can be changed later.
     
-    2. Group - Generally the primary group of the user who created the file. This can be changed later.
+    2. **Group** - Generally the primary group of the user who created the file. This can be changed later.
     
-    3. Other - All other users on the system that are not the owner or member of the owning group.
+    3. **Other** - All other users on the system that are not the owner or member of the owning group.
 
        
 

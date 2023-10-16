@@ -1,0 +1,236 @@
+## EXAMPLES OF HOW BASIC PERMISSIONS ARE HANDLED BY DIRECTORIES
+
+
+
+# useradd test
+
+# mkdir /test
+# cd /test 
+
+# chmod -v 777 /test
+
+(test)$ cd /test
+(test)$ mkdir testdir 
+(test)$ chmod -v 777 testdir
+
+# mkdir testdir/rootdir
+# touch testdir/rootdir/rootfile
+
+# chmod -v 000 testdir/rootdir
+# chmod -v 777 testdir/rootdir/rootfile
+
+# echo rootdata > testdir/rootdir/rootfile
+
+
+
+
+>>> What the user test will be able to do with rootfile in the following situations:
+
+
+>> # chmod -v 000 testdir/rootdir
+
+1. As test has read and execute permissions over testdir, being the owner user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. As nobody has no permission over rootdir, the user test will not be able to list the contents of rootdir. Tab completion will not work as it depends on read permission.
+
+3. As nobody has no permission over rootdir, the user test will not be able to:
+
+(test)$ ls -l testdir/rootdir
+(test)$ ls -l testdir/rootdir/rootfile
+(test)$ cat testdir/rootdir/rootfile
+(test)$ touch testdir/rootdir/rootfile
+(test)$ rm -rf testdir/rootdir/rootfile
+
+
+
+
+
+
+
+
+
+>> # chmod -v 444 testdir/rootdir
+
+1. As test has read and execute permissions over testdir, being the owner the user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. As everybody has read permission but no execute permission over rootdir, the user test will be able to list the contents of rootdir without any other details. Tab completion will work as it depends on read permission.
+
+3. As everybody has read permission over rootdir, the user test will be able to:
+ 
+(test)$ ls -l testdir/rootdir
+
+
+4. As everybody has read permission which allows only listing of contents over rootdir, the user test will not able to:
+
+(test)$ ls -l testdir/rootdir/rootfile
+
+(test)$ cat testdir/rootdir/rootfile
+(test)$ touch testdir/rootdir/rootfile
+(test)$ rm -rf testdir/rootdir/rootfile
+
+
+
+
+
+
+
+>> # chmod -v 222 testdir/rootdir
+
+1. As user test has read and execute permissions over testdir, being the owner user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. As all the users have only write permission but no execute permission on rootdir, the user test will not be able to create or delete or rename the contents of rootdir. Listing and tab completion will work as read permission is not present on rootdir.
+
+3  As everybody has write permission which is basically useless without execute permission on rootdir,the user test test will not be able to:
+
+(test)$ ls -l testdir/rootdir
+(test)$ ls -l testdir/rootdir/rootfile
+(test)$ cat testdir/rootdir
+(test)$ touch testdir/rootdir
+(test)$ rm -rf testdir/rootdir
+
+
+
+
+
+
+
+
+>> # chmod -v 111 testdir/rootdir
+
+1. As user test has read and execute permissions over testdir, being the owner user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. Due to just execute permission on rootdir the user test will not be able to list the contents but will be able to read or write or modify the file contents if the correct path of the file or directory is known.
+
+3. Due to the fact that write permission is not present the user test cannot delete or rename the file itself.
+
+4. As all users have execute permission over rootdir, test user will not be able to:
+
+(test)$ ls -l testdir/rootdir
+(test)$ rm -rf testdir/rootdir/rootfile 
+
+
+5. As all users have execute permission over rootdir, test user will be able to:
+
+(test)$ ls -l  testdir/rootdir/rootfile
+(test)$ cat testdir/rootdir/rootfile
+(test)$ touch testdir/rootdir/rootfile
+
+
+
+
+
+
+
+
+
+>> # chmod -v 666 testdir/rootdir
+
+1. As test has read and execute permissions over testdir, being the owner user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. As all the users have only read and write permissions but no execute permission over rootdir, the user test will able to just list the contents of rootdir without any other details. Tab completion will work.
+
+3. As everybody has write permission on rootdir but no execute permission, the user test cannot delete rootfile as execute permission is not set and for any creation or deletion or renaming first access to file is necessary. In short the write permission is useless as it has no practical value without execute permission if set on a directory.
+
+4. As everybody has read permission over rootdir, the user test will be able to:
+
+(test)$ ls -l testdir/rootdir
+
+
+5  As everybody has read permission which allows only listing of contents over rootdir, and write permission which is basically useless without execute permission the user test will not able to:
+
+(test)$ cat testdir/rootdir/rootfile
+(test)$ touch testdir/rootdir/rootfile
+(test)$ rm -rf testdir/rootdir/rootfile
+
+
+
+
+
+
+
+
+>> # chmod -v 333 testdir/rootdir
+
+1. As test has read and execute permissions over testdir, being the owner user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. As everybody has no read permissions over rootdir, the user test will not be able to list the directory contents of the directory rootdir. Tab completion will not work.
+
+3. As everybody has execute permission over rootdir, the user test will have access to rootdir but due to absence of read permission the user test will not be able to list contents of rootdr but access will be allowed if correct path to files or directories is known. 
+
+4. The presence of write permission with execute permission will allow user test to modify or delete or rename rootfile.
+
+5. As all users have execute and write permissions over rootdir, test user will be able to:
+
+(test)$ ls -l testdir/rootdir/rootfile
+(test)$ cat testdir/rootdir/rootfile
+(test)$ touch testdir/rootdir/rootfile
+(test)$ rm -rf testdir/rootdir/rootfile
+
+
+6. As nobody has read permission over rootdir, the user test will not be able to:
+
+(test)$ ls -l testdir/rootdir
+
+
+
+
+
+>> # chmod -v 555 testdir/rootdir
+
+1. As test has read and execute permissions over testdir, being the owner user test will be able to list and access the files and directories in testdir. So user test will be able to list the contents of testdir. Tab completion will work.
+
+2. As everybody has read and execute permissions on rootdir, the user test will be able to list directory contents with all the details as the execute permission is set. It is the recommended and necessary and the most meaningful permission for just read only access to a directory as the read permission will facilitate listing of filenames and execute bit facilitates access to files and subdirectories contained in parent directory and metadata related to files such as file permissions and timestamps.
+
+3. The absence of write permission protects unauthorized creation or deletion or renaming of files in a parent directory, in this case rootdir.
+
+4. Due to presence of read and execute permissions the user test will be able to do:
+
+(test)$ ls -l testdir/rootdir/
+(test)$ ls -l testdir/rootdir/rootfile
+(test)$ cat testdir/rootdir/rootfile
+
+
+5. Due to absence of write permission, the user test will not be able to do:
+
+(test)$ touch testdir/rootdir/rootfile
+(test)$ rm -rf testdir/rootdir/rootfile
+
+
+
+
+
+>> # chmod -v 777 testdir/rootdir
+
+1. Due to presence of all the permissions in this case, the user test can list, access and modify directory contents without any restriction from permissions of parent directory. The access to file contents is dependent upon the actual file permissions but the creation or deletion or renaming or any other modification is not restricted due to permissions on parent directory.
+
+2. These are the recommended permissions for a writable directory.
+
+3. In this case the user can do:
+
+(test)$ ls -l testdir/rootdir/
+(test)$ ls -l testdir/rootdir/rootfile
+(test)$ cat testdir/rootdir/rootfile
+(test)$ touch testdir/rootdir/rootfile
+(test)$ rm -rf testdir/rootdir/rootfile
+
+
+
+
+>>> Summary
+
+1. In the above document every possible set of permissions were applied to rootdir but practiclly only the following of the above are meaningful:
+
+
+Permissions = rwx------ = 700 = Access model - owner - full access, group - no access, others - no access
+
+Permissions = rwxr-x--- = 750 = Access model - owner - full access, group - read only, others - no access  
+
+Permissions = rwxr-xr-x = 755 = Access model - owner - full access, group - read only , others - read only
+
+Permissions = rwxrwx--- = 770 = Access model - owner - full access, group - full access, others - no access
+
+Permissions = rwxrwxr-x = 775 = Access model - owner - full access, group - full access, others - read only
+
+Permissions = rwxrwxrwx = 777 = Access model - owner - full access, group - full access, others - full access
+
+2. Also remember as the parent directory permissions are not automatically inherited by subdirectories, to modify a directory recursively a user must have write permission on all the subdirectories in the parent directory. In this situation any modification of files such as deletion or bulk renaming is not effecive over files conatined in subdirectories without write permission allowing the user that wants to operate in such a way and such an operation will result in partial completion due to wrong permissions on subdirectories. It must be kept in mind that this error is due to wrong permissions on subdirectories not files as files only control their data not modification of the files themselves which is controlled by write and execute permissions on parent directory.
